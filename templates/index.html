@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>CadenceSync | Personalized</title>
+    <style>
+      :root {
+        --sync-green: #00f260;
+        --dark-bg: #121212;
+      }
+      body {
+        font-family: "Inter", sans-serif;
+        background: var(--dark-bg);
+        color: white;
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+      .panel {
+        background: #1e1e1e;
+        padding: 20px;
+        border-radius: 15px;
+        margin-bottom: 20px;
+        border: 1px solid #333;
+      }
+      h2 {
+        color: var(--sync-green);
+        font-size: 1.2rem;
+        margin-top: 0;
+      }
+      label {
+        font-size: 0.8rem;
+        color: #888;
+        display: block;
+        margin-top: 10px;
+      }
+      input,
+      select {
+        width: 100%;
+        padding: 12px;
+        background: #2a2a2a;
+        border: 1px solid #444;
+        border-radius: 8px;
+        color: white;
+        margin-top: 5px;
+        box-sizing: border-box;
+      }
+      .btn {
+        width: 100%;
+        padding: 15px;
+        border-radius: 8px;
+        border: none;
+        font-weight: bold;
+        cursor: pointer;
+        margin-top: 15px;
+      }
+      .btn-calc {
+        background: #333;
+        color: white;
+      }
+      .btn-sync {
+        background: var(--sync-green);
+        color: black;
+        font-size: 1.1rem;
+      }
+      .result-card {
+        background: #252525;
+        padding: 15px;
+        border-radius: 10px;
+        margin-top: 10px;
+        display: flex;
+        justify-content: space-between;
+        border-left: 4px solid var(--sync-green);
+      }
+      .bpm-val {
+        color: var(--sync-green);
+        font-weight: bold;
+      }
+    </style>
+  </head>
+  <body>
+    <h1 style="text-align: center; letter-spacing: -1px">
+      CADENCE<span style="color: var(--sync-green)">SYNC</span>
+    </h1>
+
+    <div class="panel">
+      <h2>1. Calculate Your Cadence</h2>
+      <label>Height (cm)</label>
+      <input type="number" id="userHeight" value="175" />
+
+      <label>Activity Intensity</label>
+      <select id="userActivity">
+        <option value="walk">Brisk Walk</option>
+        <option value="jog">Steady Jog</option>
+        <option value="run">Performance Run</option>
+      </select>
+
+      <button class="btn btn-calc" onclick="calculateSPM()">
+        Estimate My SPM
+      </button>
+    </div>
+
+    <div class="panel">
+      <h2>2. Sync Music</h2>
+      <label>Target BPM / SPM</label>
+      <input type="number" id="targetBPM" value="120" />
+
+      <label>Genre</label>
+      <select id="genreSelect">
+        <option value="">All Genres</option>
+        <option value="Electronic">Electronic</option>
+        <option value="Rock">Rock</option>
+        <option value="Hip-Hop">Hip-Hop</option>
+        <option value="Pop">Pop</option>
+      </select>
+
+      <button class="btn btn-sync" onclick="syncMusic()">SYNC NOW</button>
+    </div>
+
+    <div id="results"></div>
+
+    <script>
+      async function calculateSPM() {
+        const height = document.getElementById("userHeight").value;
+        const activity = document.getElementById("userActivity").value;
+
+        const response = await fetch("/calculate-spm", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ height, activity }),
+        });
+        const data = await response.json();
+        document.getElementById("targetBPM").value = data.spm;
+      }
+
+      async function syncMusic() {
+        const target = document.getElementById("targetBPM").value;
+        const genre = document.getElementById("genreSelect").value;
+        const resultsDiv = document.getElementById("results");
+        resultsDiv.innerHTML =
+          '<p style="text-align:center">Matching beats...</p>';
+
+        const response = await fetch(`/sync?target=${target}&genre=${genre}`);
+        const songs = await response.json();
+
+        resultsDiv.innerHTML = "";
+        songs.forEach((song) => {
+          resultsDiv.innerHTML += `
+                    <div class="result-card">
+                        <div>
+                            <strong>${song.name}</strong><br>
+                            <small style="color:#888">${song.artists}</small>
+                        </div>
+                        <span class="bpm-val">${Math.round(song.tempo)}</span>
+                    </div>`;
+        });
+      }
+    </script>
+  </body>
+</html>
