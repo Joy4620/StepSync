@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>CadenceSync | Personalized</title>
+    <title>StepSync | Personalized</title>
     <style>
       :root {
         --sync-green: #00f260;
@@ -80,7 +80,7 @@
   </head>
   <body>
     <h1 style="text-align: center; letter-spacing: -1px">
-      CADENCE<span style="color: var(--sync-green)">SYNC</span>
+      STEP<span style="color: var(--sync-green)">SYNC</span>
     </h1>
 
     <div class="panel">
@@ -113,7 +113,18 @@
         <option value="Hip-Hop">Hip-Hop</option>
         <option value="Pop">Pop</option>
       </select>
-
+      <div
+        style="margin-top: 15px; display: flex; align-items: center; gap: 10px"
+      >
+        <input
+          type="checkbox"
+          id="doubleTempo"
+          style="width: auto; margin: 0"
+        />
+        <label style="margin: 0"
+          >Allow Half/Double Tempo (e.g. 85 or 170 BPM)</label
+        >
+      </div>
       <button class="btn btn-sync" onclick="syncMusic()">SYNC NOW</button>
     </div>
 
@@ -136,11 +147,14 @@
       async function syncMusic() {
         const target = document.getElementById("targetBPM").value;
         const genre = document.getElementById("genreSelect").value;
+        const allowDouble = document.getElementById("doubleTempo").checked;
         const resultsDiv = document.getElementById("results");
         resultsDiv.innerHTML =
           '<p style="text-align:center">Matching beats...</p>';
 
-        const response = await fetch(`/sync?target=${target}&genre=${genre}`);
+        const response = await fetch(
+          `/sync?target=${target}&genre=${genre}&double=${allowDouble}`,
+        );
         const songs = await response.json();
 
         resultsDiv.innerHTML = "";

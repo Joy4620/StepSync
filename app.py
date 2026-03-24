@@ -42,12 +42,25 @@ def calculate_spm():
 def sync():
     target_bpm = request.args.get('target', default=120, type=float)
     genre = request.args.get('genre', default=None)
+    allow_double = request.args.get('double', default='false') == 'true'
     
     # We use a 2 BPM window for CadenceSync
     tolerance = 2.0
     conn = get_db_connection()
     query = "SELECT name, artists, genre, tempo FROM songs WHERE tempo BETWEEN ? AND ?"
     params = [target_bpm - tolerance, target_bpm + tolerance]
+
+    if allow_double:
+            half_target = target_bpm / 2
+            double_target = target_bpm * 2
+            
+            query = query[:-1]  # Remove the closing parenthesis
+            query += " OR (tempo BETWEEN ? AND ?) OR (tempo BETWEEN ? AND ?))"
+            params.extend([half_target - (tolerance/2), half_target + (tolerance/2)])
+            params.extend([double_target - (tolerance*2), double_target + (tolerance*2)])
+    else:
+        # If not double, just ensure the parenthesis is closed correctly
+        query += ")"
 
     if genre:
         query += " AND genre = ?"
