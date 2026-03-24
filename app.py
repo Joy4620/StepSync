@@ -5,6 +5,8 @@ import os
 app = Flask(__name__)
 
 def get_db_connection():
+    if not os.path.exists('music_database.db'):
+        return None
     try:
         conn = sqlite3.connect('music_database.db')
         conn.row_factory = sqlite3.Row
@@ -24,28 +26,31 @@ def sync():
     
     conn = get_db_connection()
     if not conn:
-        return jsonify({"error": "Database connection failed"}), 500
+        return jsonify({"error": "Database file not found. Please run database_builder.py"}), 500
 
     tolerance = 2.0
-    # Logic: Grouping BPM conditions in parentheses is vital for the 'AND genre' to work
-    conditions = ["(tempo BETWEEN ? AND ?)"]
+    # We build a list of possible BPM ranges
+    bpm_conditions = ["(tempo BETWEEN ? AND ?)"]
     params = [target_bpm - tolerance, target_bpm + tolerance]
 
     if allow_double:
-        # Half tempo (180 -> 90)
-        conditions.append("(tempo BETWEEN ? AND ?)")
-        params.extend([(target_bpm/2)-1, (target_bpm/2)+1])
-        # Double tempo (90 -> 180) - only if it stays under a realistic 220 BPM
-        if target_bpm * 2 <= 220:
-            conditions.append("(tempo BETWEEN ? AND ?)")
-            params.extend([(target_bpm*2)-2, (target_bpm*2)+2])
+        # Half tempo range
+        bpm_conditions.append("(tempo BETWEEN ? AND ?)")
+        params.extend([(target_bpm/2) - 1, (target_bpm/2) + 1])
+        
+        # Double tempo range (only if realistic)
+        if target_bpm * 2 <= 240:
+            bpm_conditions.append("(tempo BETWEEN ? AND ?)")
+            params.extend([(target_bpm*2) - 3, (target_bpm*2) + 3])
     
-    where_bpm = " OR ".join(conditions)
-    query = f"SELECT name, artists, genre, tempo FROM songs WHERE ({where_bpm})"
+    # Join BPM ranges with OR and wrap in parentheses
+    where_clause = " OR ".join(bpm_conditions)
+    query = f"SELECT name, artists, genre, tempo FROM songs WHERE ({where_clause})"
 
+    # Add Genre filter with LIKE for case-insensitivity
     if genre and genre != "":
         query += " AND genre LIKE ?"
-        params.append(genre)
+        params.append(f"%{genre}%") # Matches even if genre is a partial string
     
     query += " ORDER BY RANDOM() LIMIT 12"
     
