@@ -2,173 +2,306 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>StepSync | Personalized</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>StepSync Dashboard</title>
     <style>
       :root {
-        --sync-green: #00f260;
-        --dark-bg: #121212;
+        --sidebar-bg: #1f1f23;
+        --main-bg: #0a0a0a;
+        --orange-sync: #ff5f00;
+        --input-bg: #121212;
+        --text-main: #ffffff;
+        --text-dim: #a0a0a0;
       }
+
       body {
-        font-family: "Inter", sans-serif;
-        background: var(--dark-bg);
-        color: white;
-        max-width: 600px;
-        margin: 0 auto;
-        padding: 20px;
+        font-family:
+          "Inter",
+          -apple-system,
+          sans-serif;
+        background-color: var(--main-bg);
+        color: var(--text-main);
+        margin: 0;
+        display: flex;
+        height: 100vh;
       }
-      .panel {
-        background: #1e1e1e;
-        padding: 20px;
-        border-radius: 15px;
-        margin-bottom: 20px;
-        border: 1px solid #333;
+
+      /* --- Left Sidebar --- */
+      .sidebar {
+        width: 300px;
+        background-color: var(--sidebar-bg);
+        padding: 40px 25px;
+        display: flex;
+        flex-direction: column;
+        border-right: 1px solid #222;
+        box-sizing: border-box;
       }
-      h2 {
-        color: var(--sync-green);
-        font-size: 1.2rem;
-        margin-top: 0;
+
+      .sidebar h2 {
+        font-size: 1.1rem;
+        margin-bottom: 30px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
       }
+
+      .input-group {
+        margin-bottom: 25px;
+      }
+
       label {
-        font-size: 0.8rem;
-        color: #888;
         display: block;
-        margin-top: 10px;
+        margin-bottom: 8px;
+        font-size: 0.8rem;
+        color: var(--text-dim);
+        text-transform: capitalize;
       }
+
+      /* FIXED ALIGNMENT: Standardized height and box-sizing */
       input,
       select {
         width: 100%;
-        padding: 12px;
-        background: #2a2a2a;
-        border: 1px solid #444;
-        border-radius: 8px;
+        height: 42px; /* Fixed height for alignment */
+        padding: 0 12px; /* Horizontal padding only to prevent vertical misalignment */
+        background: var(--input-bg);
+        border: 1px solid #333;
+        border-radius: 6px;
         color: white;
-        margin-top: 5px;
-        box-sizing: border-box;
+        font-size: 1rem;
+        box-sizing: border-box; /* Ensures padding doesn't add to width/height */
+        display: block;
+        font-family: inherit;
       }
-      .btn {
-        width: 100%;
-        padding: 15px;
-        border-radius: 8px;
+
+      /* Prettier Dropdown Arrows */
+      select {
+        appearance: none;
+        -webkit-appearance: none;
+        cursor: pointer;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23a0a0a0' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 10px center;
+        background-size: 14px;
+        padding-right: 35px;
+      }
+
+      input:focus,
+      select:focus {
+        outline: none;
+        border-color: var(--orange-sync);
+      }
+
+      /* --- Right Main Content --- */
+      .main-content {
+        flex: 1;
+        padding: 60px 80px;
+        overflow-y: auto;
+      }
+
+      h1 {
+        font-size: 3rem;
+        font-weight: 900;
+        margin: 0;
+      }
+
+      .cadence-display {
+        margin: 40px 0;
+      }
+      .cadence-label {
+        color: var(--text-dim);
+        font-size: 1rem;
+      }
+      .spm-value {
+        font-size: 3.5rem;
+        font-weight: 900;
+        color: var(--orange-sync);
+        display: block;
+      }
+
+      .playlist-header {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-top: 50px;
+        border-bottom: 1px solid #222;
+        padding-bottom: 15px;
+        margin-bottom: 25px;
+      }
+
+      .find-btn {
+        background: var(--orange-sync);
+        color: white;
         border: none;
+        padding: 12px 24px;
+        border-radius: 20px;
         font-weight: bold;
         cursor: pointer;
-        margin-top: 15px;
+        margin-top: 20px;
+        transition: transform 0.1s;
       }
-      .btn-calc {
-        background: #333;
-        color: white;
+      .find-btn:active {
+        transform: scale(0.98);
       }
-      .btn-sync {
-        background: var(--sync-green);
-        color: black;
-        font-size: 1.1rem;
-      }
-      .result-card {
-        background: #252525;
-        padding: 15px;
+
+      .song-card {
+        background: #16161a;
+        padding: 20px;
         border-radius: 10px;
-        margin-top: 10px;
+        margin-bottom: 12px;
         display: flex;
         justify-content: space-between;
-        border-left: 4px solid var(--sync-green);
+        align-items: center;
       }
-      .bpm-val {
-        color: var(--sync-green);
-        font-weight: bold;
+
+      .bpm-tag {
+        color: var(--orange-sync);
+        font-weight: 900;
+        font-family: monospace;
+        font-size: 1.2rem;
+      }
+
+      .double-tempo-check {
+        margin-top: 15px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 0.85rem;
+        color: var(--text-dim);
+      }
+
+      .double-tempo-check input {
+        width: 18px;
+        height: 18px;
+        margin: 0;
+        cursor: pointer;
       }
     </style>
   </head>
   <body>
-    <h1 style="text-align: center; letter-spacing: -1px">
-      STEP<span style="color: var(--sync-green)">SYNC</span>
-    </h1>
+    <div class="sidebar">
+      <h2>🏃‍♂️ Runner Profile</h2>
 
-    <div class="panel">
-      <h2>1. Calculate Your Cadence</h2>
-      <label>Height (cm)</label>
-      <input type="number" id="userHeight" value="175" />
-
-      <label>Activity Intensity</label>
-      <select id="userActivity">
-        <option value="walk">Brisk Walk</option>
-        <option value="jog">Steady Jog</option>
-        <option value="run">Performance Run</option>
-      </select>
-
-      <button class="btn btn-calc" onclick="calculateSPM()">
-        Estimate My SPM
-      </button>
-    </div>
-
-    <div class="panel">
-      <h2>2. Sync Music</h2>
-      <label>Target BPM / SPM</label>
-      <input type="number" id="targetBPM" value="120" />
-
-      <label>Genre</label>
-      <select id="genreSelect">
-        <option value="">All Genres</option>
-        <option value="Electronic">Electronic</option>
-        <option value="Rock">Rock</option>
-        <option value="Hip-Hop">Hip-Hop</option>
-        <option value="Pop">Pop</option>
-      </select>
-      <div
-        style="margin-top: 15px; display: flex; align-items: center; gap: 10px"
-      >
+      <div class="input-group">
+        <label>Height (cm)</label>
         <input
-          type="checkbox"
-          id="doubleTempo"
-          style="width: auto; margin: 0"
+          type="number"
+          id="userHeight"
+          value="175"
+          oninput="updateSPM()"
         />
-        <label style="margin: 0"
-          >Allow Half/Double Tempo (e.g. 85 or 170 BPM)</label
-        >
       </div>
-      <button class="btn btn-sync" onclick="syncMusic()">SYNC NOW</button>
+
+      <div class="input-group">
+        <label>Gender</label>
+        <select id="userGender" oninput="updateSPM()">
+          <option value="male">Male</option>
+          <option value="female">Female</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+
+      <div class="input-group">
+        <label>Activity Intensity</label>
+        <select id="userActivity" oninput="updateSPM()">
+          <option value="walk">Brisk Walk</option>
+          <option value="jog">Steady Jog</option>
+          <option value="run">Performance Run</option>
+        </select>
+      </div>
     </div>
 
-    <div id="results"></div>
+    <div class="main-content">
+      <h1>StepSync</h1>
+
+      <div class="cadence-display">
+        <span class="cadence-label">Your Optimal Cadence</span>
+        <span class="spm-value" id="spmResult">144 SPM</span>
+      </div>
+
+      <div class="playlist-section">
+        <div class="playlist-header">Generate Sync'd Playlist</div>
+
+        <label>Genre</label>
+        <select id="genreSelect" style="max-width: 400px">
+          <option value="">All Genres</option>
+          <option value="Electronic">Electronic</option>
+          <option value="Rock">Rock</option>
+          <option value="Hip-Hop">Hip-Hop</option>
+          <option value="Pop">Pop</option>
+        </select>
+
+        <div class="double-tempo-check">
+          <input type="checkbox" id="doubleTempo" />
+          <span>Allow Half/Double Tempo matching</span>
+        </div>
+
+        <button class="find-btn" onclick="syncMusic()">
+          Find Matching Tracks
+        </button>
+      </div>
+
+      <div id="results" style="margin-top: 30px"></div>
+    </div>
 
     <script>
-      async function calculateSPM() {
+      function updateSPM() {
         const height = document.getElementById("userHeight").value;
         const activity = document.getElementById("userActivity").value;
+        const gender = document.getElementById("userGender").value;
 
-        const response = await fetch("/calculate-spm", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ height, activity }),
-        });
-        const data = await response.json();
-        document.getElementById("targetBPM").value = data.spm;
+        // Biomechanical logic
+        let base = activity === "walk" ? 115 : activity === "jog" ? 148 : 175;
+        let heightAdj = (height - 170) * 0.3;
+
+        // Slightly different adjustment for Gender
+        let genderAdj = 0;
+        if (gender === "female") genderAdj = 3;
+        if (gender === "other") genderAdj = 1.5; // Average/Neutral adjustment
+
+        let finalSPM = Math.round(base - heightAdj + genderAdj);
+        document.getElementById("spmResult").textContent = `${finalSPM} SPM`;
       }
 
       async function syncMusic() {
-        const target = document.getElementById("targetBPM").value;
+        const spmText = document.getElementById("spmResult").textContent;
+        const target = spmText.split(" ")[0];
         const genre = document.getElementById("genreSelect").value;
-        const allowDouble = document.getElementById("doubleTempo").checked;
+        const double = document.getElementById("doubleTempo").checked;
         const resultsDiv = document.getElementById("results");
+
         resultsDiv.innerHTML =
-          '<p style="text-align:center">Matching beats...</p>';
+          "<p style='color: var(--orange-sync)'>Searching tracks...</p>";
 
-        const response = await fetch(
-          `/sync?target=${target}&genre=${genre}&double=${allowDouble}`,
-        );
-        const songs = await response.json();
+        try {
+          const response = await fetch(
+            `/sync?target=${target}&genre=${genre}&double=${double}`,
+          );
+          const songs = await response.json();
 
-        resultsDiv.innerHTML = "";
-        songs.forEach((song) => {
-          resultsDiv.innerHTML += `
-                    <div class="result-card">
-                        <div>
-                            <strong>${song.name}</strong><br>
-                            <small style="color:#888">${song.artists}</small>
-                        </div>
-                        <span class="bpm-val">${Math.round(song.tempo)}</span>
-                    </div>`;
-        });
+          resultsDiv.innerHTML = "";
+          if (songs.length === 0) {
+            resultsDiv.innerHTML =
+              "<p style='color: var(--text-dim)'>No matches found for this rhythm.</p>";
+            return;
+          }
+
+          songs.forEach((song) => {
+            const cleanArtist = song.artists.replace(/[\[\]"']/g, "");
+            resultsDiv.innerHTML += `
+                        <div class="song-card">
+                            <div>
+                                <div style="font-weight:bold">${song.name}</div>
+                                <div style="color:#777; font-size:0.9rem">${cleanArtist}</div>
+                            </div>
+                            <div class="bpm-tag">${Math.round(song.tempo)}</div>
+                        </div>`;
+          });
+        } catch (e) {
+          resultsDiv.innerHTML =
+            "<p style='color: red'>Error connecting to server.</p>";
+        }
       }
+
+      updateSPM();
     </script>
   </body>
 </html>
