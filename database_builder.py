@@ -8,7 +8,7 @@ if not os.path.exists('data'):
 
 def build_db():
     print("Reading CSV... this may take a minute due to file size.")
-    # Path to your downloaded Kaggle file
+    # Path to downloaded Kaggle file
     csv_path = 'data/songs.csv'
     
     if not os.path.exists(csv_path):

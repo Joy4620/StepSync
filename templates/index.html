@@ -9,6 +9,7 @@
       rel="stylesheet"
     />
     <style>
+      /* Design Tokens: Centralizing colors and styling variables for consistency */
       :root {
         --sidebar-bg: #1c1c21;
         --main-bg: #0d0d10;
@@ -19,6 +20,7 @@
         --border-color: #2a2a2e;
       }
 
+      /* Global Reset and Layout Setup */
       body {
         font-family:
           "Inter",
@@ -27,12 +29,12 @@
         background-color: var(--main-bg);
         color: var(--text-main);
         margin: 0;
-        display: flex;
+        display: flex; /* Creates the side-by-side view (Sidebar vs Main) */
         height: 100vh;
-        -webkit-font-smoothing: antialiased;
+        -webkit-font-smoothing: antialiased; /* Enhances font legibility on macOS */
       }
 
-      /* --- Left Sidebar --- */
+      /* --- Left Sidebar: Control Panel --- */
       .sidebar {
         width: 300px;
         background-color: var(--sidebar-bg);
@@ -40,7 +42,7 @@
         display: flex;
         flex-direction: column;
         border-right: 1px solid var(--border-color);
-        box-sizing: border-box;
+        box-sizing: border-box; /* Ensures padding doesn't push the width beyond 300px */
         overflow-y: auto;
       }
 
@@ -67,6 +69,7 @@
         text-transform: capitalize;
       }
 
+      /* Unified styling for all user inputs */
       input,
       select {
         width: 100%;
@@ -81,6 +84,7 @@
         font-family: inherit;
       }
 
+      /* Custom Dropdown Styling: Removing default OS arrow for a cleaner SVG arrow */
       select {
         appearance: none;
         -webkit-appearance: none;
@@ -97,9 +101,9 @@
         border-color: var(--orange-sync);
       }
 
-      /* --- Right Main Content --- */
+      /* --- Right Main Content: Dashboard Display --- */
       .main-content {
-        flex: 1;
+        flex: 1; /* Takes up all remaining screen space */
         padding: 60px 80px;
         overflow-y: auto;
       }
@@ -114,11 +118,13 @@
       .cadence-display {
         margin: 30px 0 50px 0;
       }
+
       .cadence-label {
         color: var(--text-dim);
         font-size: 0.9rem;
         font-weight: 500;
       }
+
       .spm-value {
         font-size: 3.2rem;
         font-weight: 800;
@@ -158,10 +164,10 @@
       }
 
       .find-btn:active {
-        transform: scale(0.97);
+        transform: scale(0.97); /* Subtle "click" effect */
       }
 
-      /* --- Refined Song Cards --- */
+      /* --- List Layout for Song Results --- */
       .song-card {
         background: transparent;
         padding: 16px 0;
@@ -169,7 +175,7 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        border-bottom: 1px solid var(--border-color); /* Matched to cleaner list style */
+        border-bottom: 1px solid var(--border-color);
       }
 
       .song-info {
@@ -177,20 +183,21 @@
         flex-direction: column;
         gap: 2px;
       }
+
       .song-title {
         font-weight: 700;
         font-size: 1.05rem;
         letter-spacing: -0.01em;
       }
+
       .song-artist {
         color: var(--text-dim);
         font-size: 0.85rem;
         font-weight: 400;
       }
+
       .bpm-tag {
-        color: var(
-          --text-dim
-        ); /* Switched to grey for a cleaner, less "busy" list */
+        color: var(--text-dim);
         font-weight: 600;
         font-size: 0.9rem;
         background: #1c1c21;
@@ -304,52 +311,71 @@
     </div>
 
     <script>
+      /**
+       * updateSPM: Logic for biometric cadence estimation
+       * Triggers whenever user values in the sidebar change.
+       */
       function updateSPM() {
         const manualInput = document.getElementById("manualBPM").value;
         const spmDisplay = document.getElementById("spmResult");
 
+        // Priority Check: If user typed a manual BPM, skip the math
         if (manualInput && manualInput > 0) {
           spmDisplay.textContent = `${manualInput} SPM`;
           return;
         }
 
+        // Gather biometric variables
         const h = document.getElementById("userHeight").value;
         const g = document.getElementById("userGender").value;
         const a = document.getElementById("userActivity").value;
 
+        // Mathematical Model: Base rate by activity intensity
         let base = a === "walk" ? 115 : a === "jog" ? 148 : 175;
+
+        // Biometric adjustment based on gender averages
         let genderAdj = g === "female" ? 3 : g === "other" ? 1.5 : 0;
 
+        // Physics Logic: Inverse relationship between leg length (height) and cadence frequency
         let finalSPM = Math.round(base - (h - 170) * 0.3 + genderAdj);
         spmDisplay.textContent = `${finalSPM} SPM`;
       }
 
+      /**
+       * syncMusic: The bridge between Frontend and Backend
+       * Fetches filtered song data from the Python server based on user targets.
+       */
       async function syncMusic() {
         const target = document
           .getElementById("spmResult")
-          .textContent.split(" ")[0];
+          .textContent.split(" ")[0]; // Isolate the number from "144 SPM"
         const genre = document.getElementById("genreSelect").value;
         const double = document.getElementById("doubleTempo").checked;
         const resultsDiv = document.getElementById("results");
         const loader = document.getElementById("loading");
 
+        // UI Reset
         resultsDiv.innerHTML = "";
         loader.style.display = "block";
 
         try {
+          // Send GET request to the Flask server (/sync route) with query parameters
           const response = await fetch(
             `/sync?target=${target}&genre=${genre}&double=${double}`,
           );
           const songs = await response.json();
           loader.style.display = "none";
 
+          // Handle empty results
           if (songs.length === 0) {
             resultsDiv.innerHTML =
               "<p style='color: var(--text-dim)'>No tracks found for this cadence.</p>";
             return;
           }
 
+          // Render Loop: Creating the HTML for each song card returned
           songs.forEach((song) => {
+            // Data Scrubbing: Removing JSON formatting from artist strings for clean display
             const cleanArtist = song.artists.replace(/[\[\]"']/g, "");
             resultsDiv.innerHTML += `
               <div class="song-card">
@@ -367,6 +393,7 @@
         }
       }
 
+      // Initial execution to populate display on page load
       updateSPM();
     </script>
   </body>
