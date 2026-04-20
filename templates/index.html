@@ -4,14 +4,19 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>StepSync Dashboard</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
     <style>
       :root {
-        --sidebar-bg: #1f1f23;
-        --main-bg: #0a0a0a;
-        --orange-sync: #ff5f00;
+        --sidebar-bg: #1c1c21;
+        --main-bg: #0d0d10;
+        --orange-sync: #e85d1c;
         --input-bg: #121212;
         --text-main: #ffffff;
-        --text-dim: #a0a0a0;
+        --text-dim: #949499;
+        --border-color: #2a2a2e;
       }
 
       body {
@@ -24,25 +29,29 @@
         margin: 0;
         display: flex;
         height: 100vh;
+        -webkit-font-smoothing: antialiased;
       }
 
+      /* --- Left Sidebar --- */
       .sidebar {
         width: 300px;
         background-color: var(--sidebar-bg);
         padding: 40px 25px;
         display: flex;
         flex-direction: column;
-        border-right: 1px solid #222;
+        border-right: 1px solid var(--border-color);
         box-sizing: border-box;
         overflow-y: auto;
       }
 
       .sidebar h2 {
         font-size: 1.1rem;
+        font-weight: 700;
         margin-bottom: 30px;
         display: flex;
         align-items: center;
         gap: 10px;
+        letter-spacing: -0.02em;
       }
 
       .input-group {
@@ -52,7 +61,8 @@
       label {
         display: block;
         margin-bottom: 8px;
-        font-size: 0.8rem;
+        font-size: 0.75rem;
+        font-weight: 500;
         color: var(--text-dim);
         text-transform: capitalize;
       }
@@ -63,10 +73,10 @@
         height: 42px;
         padding: 0 12px;
         background: var(--input-bg);
-        border: 1px solid #333;
+        border: 1px solid var(--border-color);
         border-radius: 6px;
         color: white;
-        font-size: 1rem;
+        font-size: 0.95rem;
         box-sizing: border-box;
         font-family: inherit;
       }
@@ -75,12 +85,19 @@
         appearance: none;
         -webkit-appearance: none;
         cursor: pointer;
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23a0a0a0' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23949499' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
         background-repeat: no-repeat;
         background-position: right 10px center;
         background-size: 14px;
       }
 
+      input:focus,
+      select:focus {
+        outline: none;
+        border-color: var(--orange-sync);
+      }
+
+      /* --- Right Main Content --- */
       .main-content {
         flex: 1;
         padding: 60px 80px;
@@ -88,72 +105,106 @@
       }
 
       h1 {
-        font-size: 3rem;
-        font-weight: 900;
+        font-size: 2.8rem;
+        font-weight: 800;
         margin: 0;
+        letter-spacing: -0.04em;
       }
 
+      .cadence-display {
+        margin: 30px 0 50px 0;
+      }
+      .cadence-label {
+        color: var(--text-dim);
+        font-size: 0.9rem;
+        font-weight: 500;
+      }
       .spm-value {
-        font-size: 3.5rem;
-        font-weight: 900;
+        font-size: 3.2rem;
+        font-weight: 800;
         color: var(--orange-sync);
         display: block;
-        margin-top: 10px;
+        margin-top: 8px;
+        letter-spacing: -0.02em;
+      }
+
+      .playlist-header {
+        font-size: 1.4rem;
+        font-weight: 700;
+        margin-top: 40px;
+        border-bottom: 1px solid var(--border-color);
+        padding-bottom: 12px;
+        margin-bottom: 25px;
+        letter-spacing: -0.02em;
       }
 
       .find-btn {
         background: var(--orange-sync);
         color: white;
         border: none;
-        padding: 14px 28px;
-        border-radius: 25px;
-        font-weight: bold;
+        padding: 12px 28px;
+        border-radius: 20px;
+        font-weight: 700;
+        font-size: 0.95rem;
         cursor: pointer;
-        margin-top: 30px;
-        transition: transform 0.1s;
+        margin-top: 25px;
+        transition:
+          transform 0.1s,
+          background 0.2s;
+      }
+
+      .find-btn:hover {
+        background: #f26d2d;
       }
 
       .find-btn:active {
-        transform: scale(0.96);
+        transform: scale(0.97);
       }
 
+      /* --- Refined Song Cards --- */
       .song-card {
-        background: #16161a;
-        padding: 16px 20px;
-        border-radius: 12px;
-        margin-bottom: 12px;
+        background: transparent;
+        padding: 16px 0;
+        margin-bottom: 0;
         display: flex;
         justify-content: space-between;
         align-items: center;
-        border: 1px solid #222;
+        border-bottom: 1px solid var(--border-color); /* Matched to cleaner list style */
       }
 
       .song-info {
         display: flex;
         flex-direction: column;
-        gap: 4px;
+        gap: 2px;
       }
       .song-title {
         font-weight: 700;
-        font-size: 1.1rem;
+        font-size: 1.05rem;
+        letter-spacing: -0.01em;
       }
       .song-artist {
         color: var(--text-dim);
-        font-size: 0.9rem;
+        font-size: 0.85rem;
+        font-weight: 400;
       }
       .bpm-tag {
-        color: var(--orange-sync);
-        font-weight: 900;
-        font-family: monospace;
-        font-size: 1.2rem;
+        color: var(
+          --text-dim
+        ); /* Switched to grey for a cleaner, less "busy" list */
+        font-weight: 600;
+        font-size: 0.9rem;
+        background: #1c1c21;
+        padding: 6px 14px;
+        border-radius: 6px;
       }
 
       .check-group {
         display: flex;
         align-items: center;
-        gap: 10px;
-        margin-top: 15px;
+        gap: 12px;
+        margin-top: 20px;
         font-size: 0.85rem;
+        font-weight: 500;
         color: var(--text-dim);
       }
 
@@ -161,7 +212,13 @@
         color: var(--orange-sync);
         display: none;
         margin-top: 20px;
-        font-weight: bold;
+        font-weight: 600;
+      }
+
+      hr {
+        border: 0;
+        border-top: 1px solid var(--border-color);
+        margin: 10px 0 25px 0;
       }
     </style>
   </head>
@@ -194,9 +251,7 @@
         </select>
       </div>
 
-      <hr
-        style="border: 0; border-top: 1px solid #333; margin: 10px 0 25px 0"
-      />
+      <hr />
 
       <div class="input-group">
         <label>Manual BPM Override</label>
@@ -206,26 +261,18 @@
           placeholder="e.g. 180"
           oninput="updateSPM()"
         />
-        <small
-          style="
-            color: var(--text-dim);
-            font-size: 0.7rem;
-            display: block;
-            margin-top: 5px;
-          "
-        >
-          Leave blank to use Calculator
-        </small>
       </div>
     </div>
 
     <div class="main-content">
       <h1>StepSync</h1>
       <div class="cadence-display">
+        <span class="cadence-label">Your Optimal Cadence</span>
         <span id="spmResult" class="spm-value">144 SPM</span>
       </div>
 
       <div class="playlist-section">
+        <div class="playlist-header">Generate Sync'd Playlist</div>
         <label>Genre Filter</label>
         <select id="genreSelect" style="max-width: 400px">
           <option value="">All Genres</option>
@@ -238,7 +285,12 @@
           <input
             type="checkbox"
             id="doubleTempo"
-            style="width: 18px; height: 18px; cursor: pointer"
+            style="
+              width: 16px;
+              height: 16px;
+              cursor: pointer;
+              accent-color: var(--orange-sync);
+            "
           />
           <span>Allow Half/Double Tempo</span>
         </div>
@@ -256,13 +308,11 @@
         const manualInput = document.getElementById("manualBPM").value;
         const spmDisplay = document.getElementById("spmResult");
 
-        // Priority 1: Manual Input
         if (manualInput && manualInput > 0) {
           spmDisplay.textContent = `${manualInput} SPM`;
           return;
         }
 
-        // Priority 2: Biometric Calc
         const h = document.getElementById("userHeight").value;
         const g = document.getElementById("userGender").value;
         const a = document.getElementById("userActivity").value;
@@ -302,13 +352,13 @@
           songs.forEach((song) => {
             const cleanArtist = song.artists.replace(/[\[\]"']/g, "");
             resultsDiv.innerHTML += `
-                        <div class="song-card">
-                            <div class="song-info">
-                                <span class="song-title">${song.name}</span>
-                                <span class="song-artist">${cleanArtist}</span>
-                            </div>
-                            <div class="bpm-tag">${Math.round(song.tempo)}</div>
-                        </div>`;
+              <div class="song-card">
+                <div class="song-info">
+                  <span class="song-title">${song.name}</span>
+                  <span class="song-artist">${cleanArtist}</span>
+                </div>
+                <div class="bpm-tag">${Math.round(song.tempo)} BPM</div>
+              </div>`;
           });
         } catch (err) {
           loader.style.display = "none";
@@ -317,7 +367,6 @@
         }
       }
 
-      // Run once on load
       updateSPM();
     </script>
   </body>
