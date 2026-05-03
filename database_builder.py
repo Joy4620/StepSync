@@ -16,7 +16,7 @@ def build_db():
         return
 
     # Load only the columns we need to save memory
-    cols = ['name', 'artists', 'genre', 'tempo', 'id']
+    cols = ['name', 'artists', 'genre', 'tempo', 'id', 'energy']
     df = pd.read_csv(csv_path, usecols=cols)
 
     # Clean up any missing values

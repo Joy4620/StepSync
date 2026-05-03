@@ -24,35 +24,41 @@ def sync():
     genre = request.args.get('genre', default=None)
     allow_double = request.args.get('double', default='false') == 'true'
     
+    # NEW PARAMETERS
+    tolerance = request.args.get('tolerance', default=2.0, type=float)
+    limit = request.args.get('limit', default=12, type=int)
+    
+    # Cast energy to float explicitly to avoid logic errors
+    energy_raw = request.args.get('energy')
+    target_energy = float(energy_raw) if energy_raw else 0.7
+    
     conn = get_db_connection()
     if not conn:
-        return jsonify({"error": "Database file not found. Please run database_builder.py"}), 500
+        return jsonify({"error": "Database error"}), 500
 
-    tolerance = 2.0
-    # We build a list of possible BPM ranges
+    params = []
     bpm_conditions = ["(tempo BETWEEN ? AND ?)"]
-    params = [target_bpm - tolerance, target_bpm + tolerance]
+    params.extend([target_bpm - tolerance, target_bpm + tolerance])
 
     if allow_double:
-        # Half tempo range
         bpm_conditions.append("(tempo BETWEEN ? AND ?)")
-        params.extend([(target_bpm/2) - 1, (target_bpm/2) + 1])
-        
-        # Double tempo range (only if realistic)
+        params.extend([(target_bpm/2) - (tolerance/2), (target_bpm/2) + (tolerance/2)])
         if target_bpm * 2 <= 240:
             bpm_conditions.append("(tempo BETWEEN ? AND ?)")
-            params.extend([(target_bpm*2) - 3, (target_bpm*2) + 3])
+            params.extend([(target_bpm*2) - tolerance, (target_bpm*2) + tolerance])
     
-    # Join BPM ranges with OR and wrap in parentheses
-    where_clause = " OR ".join(bpm_conditions)
-    query = f"SELECT name, artists, genre, tempo FROM songs WHERE ({where_clause})"
+    where_clause = f"({' OR '.join(bpm_conditions)})"
+    
+    # Energy Filter (±0.15 range)
+    where_clause += " AND (energy BETWEEN ? AND ?)"
+    params.extend([target_energy - 0.15, target_energy + 0.15])
 
-    # Add Genre filter with LIKE for case-insensitivity
     if genre and genre != "":
-        query += " AND genre LIKE ?"
-        params.append(f"%{genre}%") # Matches even if genre is a partial string
+        where_clause += " AND genre LIKE ?"
+        params.append(f"%{genre}%")
     
-    query += " ORDER BY RANDOM() LIMIT 12"
+    query = f"SELECT name, artists, genre, tempo, energy FROM songs WHERE {where_clause} ORDER BY RANDOM() LIMIT ?"
+    params.append(limit)
     
     try:
         results = conn.execute(query, params).fetchall()

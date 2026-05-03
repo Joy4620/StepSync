@@ -10,7 +10,6 @@
     />
     <style>
       :root {
-        /* Changed sidebar to a deep purple-tinted dark shade */
         --sidebar-bg: #161625;
         --main-bg: #0d0d10;
         --vibe-accent: #c74ed4;
@@ -22,10 +21,7 @@
       }
 
       body {
-        font-family:
-          "Inter",
-          -apple-system,
-          sans-serif;
+        font-family: "Inter", sans-serif;
         background-color: var(--main-bg);
         color: var(--text-main);
         margin: 0;
@@ -34,7 +30,6 @@
         -webkit-font-smoothing: antialiased;
       }
 
-      /* --- Left Sidebar --- */
       .sidebar {
         width: 300px;
         background-color: var(--sidebar-bg);
@@ -85,7 +80,6 @@
 
       select {
         appearance: none;
-        -webkit-appearance: none;
         cursor: pointer;
         background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23949499' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
         background-repeat: no-repeat;
@@ -99,7 +93,6 @@
         border-color: var(--vibe-accent);
       }
 
-      /* --- Right Main Content --- */
       .main-content {
         flex: 1;
         padding: 60px 80px;
@@ -121,11 +114,13 @@
       .cadence-display {
         margin: 30px 0 50px 0;
       }
+
       .cadence-label {
         color: var(--text-dim);
         font-size: 0.9rem;
         font-weight: 500;
       }
+
       .spm-value {
         font-size: 3.2rem;
         font-weight: 800;
@@ -163,16 +158,13 @@
       .find-btn:hover {
         background: var(--vibe-accent-hover);
       }
-
       .find-btn:active {
         transform: scale(0.97);
       }
 
-      /* --- Refined Song Cards --- */
       .song-card {
         background: transparent;
         padding: 16px 0;
-        margin-bottom: 0;
         display: flex;
         justify-content: space-between;
         align-items: center;
@@ -187,12 +179,10 @@
       .song-title {
         font-weight: 700;
         font-size: 1.05rem;
-        letter-spacing: -0.01em;
       }
       .song-artist {
         color: var(--text-dim);
         font-size: 0.85rem;
-        font-weight: 400;
       }
       .bpm-tag {
         color: var(--text-dim);
@@ -219,7 +209,6 @@
         margin-top: 20px;
         font-weight: 600;
       }
-
       hr {
         border: 0;
         border-top: 1px solid var(--border-color);
@@ -255,9 +244,7 @@
           <option value="run">Fast Run</option>
         </select>
       </div>
-
       <hr />
-
       <div class="input-group">
         <label>Manual BPM Override</label>
         <input
@@ -267,6 +254,30 @@
           oninput="updateSPM()"
         />
       </div>
+      <div class="input-group">
+        <label>BPM Tolerance (±)</label>
+        <input type="number" id="tolerance" value="2" step="0.5" />
+      </div>
+      <div class="input-group">
+        <label>Song Limit</label>
+        <input type="number" id="songLimit" value="12" />
+      </div>
+      <div class="input-group">
+        <label>Target Energy (0.0 - 1.0)</label>
+        <input
+          type="range"
+          id="energyRange"
+          min="0"
+          max="1"
+          step="0.1"
+          value="0.7"
+        />
+        <span
+          id="energyVal"
+          style="font-size: 0.8rem; color: var(--vibe-accent)"
+          >0.7</span
+        >
+      </div>
     </div>
 
     <div class="main-content">
@@ -275,7 +286,6 @@
         <span class="cadence-label">Your Optimal Cadence</span>
         <span id="spmResult" class="spm-value">144 SPM</span>
       </div>
-
       <div class="playlist-section">
         <div class="playlist-header">Generate Sync'd Playlist</div>
         <label>Genre Filter</label>
@@ -303,7 +313,6 @@
           Find Matching Tracks
         </button>
       </div>
-
       <div id="loading">Syncing beats...</div>
       <div id="results" style="margin-top: 30px"></div>
     </div>
@@ -312,19 +321,15 @@
       function updateSPM() {
         const manualInput = document.getElementById("manualBPM").value;
         const spmDisplay = document.getElementById("spmResult");
-
         if (manualInput && manualInput > 0) {
           spmDisplay.textContent = `${manualInput} SPM`;
           return;
         }
-
         const h = document.getElementById("userHeight").value;
         const g = document.getElementById("userGender").value;
         const a = document.getElementById("userActivity").value;
-
         let base = a === "walk" ? 115 : a === "jog" ? 148 : 175;
         let genderAdj = g === "female" ? 3 : g === "other" ? 1.5 : 0;
-
         let finalSPM = Math.round(base - (h - 170) * 0.3 + genderAdj);
         spmDisplay.textContent = `${finalSPM} SPM`;
       }
@@ -335,6 +340,10 @@
           .textContent.split(" ")[0];
         const genre = document.getElementById("genreSelect").value;
         const double = document.getElementById("doubleTempo").checked;
+        const tolerance = document.getElementById("tolerance").value;
+        const limit = document.getElementById("songLimit").value;
+        const energy = document.getElementById("energyRange").value;
+
         const resultsDiv = document.getElementById("results");
         const loader = document.getElementById("loading");
 
@@ -342,15 +351,14 @@
         loader.style.display = "block";
 
         try {
-          const response = await fetch(
-            `/sync?target=${target}&genre=${genre}&double=${double}`,
-          );
+          const url = `/sync?target=${target}&genre=${genre}&double=${double}&tolerance=${tolerance}&limit=${limit}&energy=${energy}`;
+          const response = await fetch(url);
           const songs = await response.json();
           loader.style.display = "none";
 
           if (songs.length === 0) {
             resultsDiv.innerHTML =
-              "<p style='color: var(--text-dim)'>No tracks found for this cadence.</p>";
+              "<p style='color: var(--text-dim)'>No tracks found for this cadence/energy combo.</p>";
             return;
           }
 
@@ -368,9 +376,13 @@
         } catch (err) {
           loader.style.display = "none";
           resultsDiv.innerHTML =
-            "<p style='color:red'>Failed to connect to server.</p>";
+            "<p style='color:red'>Error fetching songs.</p>";
         }
       }
+
+      document.getElementById("energyRange").oninput = function () {
+        document.getElementById("energyVal").innerText = this.value;
+      };
 
       updateSPM();
     </script>
